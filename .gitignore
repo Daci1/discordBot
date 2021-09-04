@@ -3,6 +3,8 @@
 *.war
 *.ear
 *.class
+#Don't upload the bot token
+Token.java
 
 # eclipse specific git ignore
 *.pydevproject

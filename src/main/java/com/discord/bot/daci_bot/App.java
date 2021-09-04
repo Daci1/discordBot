@@ -15,7 +15,7 @@ public class App {
 	private static JDA bot;
 
 	public static void main(String[] args) throws LoginException, InterruptedException {
-		bot = JDABuilder.createDefault("ODE2MDE1MDE2OTc2NTgwNjQ5.YD0zNA.kvOweNPW4dKk4-UVlUWmPCKUM5w").build();
+		bot = JDABuilder.createDefault(Token.getToken()).build();
 
 		Presence botPresence = bot.getPresence();
 		botPresence.setStatus(OnlineStatus.ONLINE);
