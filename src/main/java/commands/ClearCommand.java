@@ -11,7 +11,7 @@ public class ClearCommand implements ICommand {
 	}
 
 	@Override
-	public void execute(GuildMessageReceivedEvent event) {
+	public void handle(GuildMessageReceivedEvent event) {
 
 		System.out.println("ceva");
 

@@ -19,16 +19,7 @@ public class App {
 
 		Presence botPresence = bot.getPresence();
 		botPresence.setStatus(OnlineStatus.ONLINE);
-//        botPresence.setActivity(Activity.playing("cu niste oameni foarte respectabili"));
 		bot.addEventListener(CommandListener.getInstance());
 	}
-//    @Override
-//    public void onEvent(GenericEvent event)
-//    {
-//        if (event instanceof ReadyEvent) {
-//        	bot.getGuilds().forEach(server -> server.getMembers().forEach(member -> System.out.println(member)));
-//        }
-//            
-//    }
 
 }

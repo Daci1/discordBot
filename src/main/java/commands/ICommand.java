@@ -6,6 +6,6 @@ public interface ICommand {
 	public static String prefix = ".";
 	public static String userID = "284763028178599936"; // creator id
 
-	public abstract void execute(GuildMessageReceivedEvent event);
+	public abstract void handle(GuildMessageReceivedEvent event);
 
 }
