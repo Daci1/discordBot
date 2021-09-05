@@ -10,8 +10,8 @@ public class GreetCommand implements ICommand {
 	private GreetCommand() {
 	};
 
-	public void execute(GuildMessageReceivedEvent event) {
-		event.getChannel().sendMessage("Hi " + event.getAuthor().getName()).queue();
+	public void handle(GuildMessageReceivedEvent event) {
+		event.getChannel().sendMessage("Hi " + event.getAuthor().getAsMention()).queue();
 	}
 
 	public static GreetCommand getInstance() {
