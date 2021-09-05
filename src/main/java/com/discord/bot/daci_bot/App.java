@@ -21,5 +21,9 @@ public class App {
 		botPresence.setStatus(OnlineStatus.ONLINE);
 		bot.addEventListener(CommandListener.getInstance());
 	}
+	
+	public static JDA getBot() {
+		return bot;
+	}
 
 }
