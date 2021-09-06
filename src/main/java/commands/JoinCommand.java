@@ -15,6 +15,7 @@ public class JoinCommand implements ICommand {
 
 	@Override
 	public void handle(GuildMessageReceivedEvent event) {
+		//TODO already connected here
 		VoiceChannel channel = event.getMember().getVoiceState().getChannel();
 		TextChannel textChannel = event.getChannel();
 		try {

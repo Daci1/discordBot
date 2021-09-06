@@ -2,19 +2,18 @@ package commands;
 
 import com.discord.bot.daci_bot.App;
 
-import AudioPlayer.GuildMusicManager;
-import AudioPlayer.PlayerManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.managers.AudioManager;
 
-public class StopCommand implements ICommand {
+public class LeaveCommand implements ICommand {
 
-	private static StopCommand instance;
+	private static LeaveCommand instance;
 
-	private StopCommand() {
+	private LeaveCommand() {
 	}
 
 	@Override
@@ -40,19 +39,18 @@ public class StopCommand implements ICommand {
 			return;
 		}
 
-		final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(guild);
-		musicManager.scheduler.player.stopTrack();
-		musicManager.scheduler.queue.clear();
-		channel.sendMessage(":loud_sound: The player has been stopped and the queue has been cleared").queue();
+		final AudioManager audioManager = guild.getAudioManager();
+		audioManager.closeAudioConnection();
+		
+		channel.sendMessage("Leaving `" + selfVoiceState.getChannel().getName() + "` :hand_splayed:").queue();
 
 	}
 
-	public static StopCommand getInstance() {
+	public static LeaveCommand getInstance() {
 		if (instance == null) {
-			instance = new StopCommand();
+			instance = new LeaveCommand();
 		}
 
 		return instance;
 	}
-
 }

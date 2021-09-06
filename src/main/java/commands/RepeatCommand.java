@@ -10,13 +10,12 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-public class StopCommand implements ICommand {
+public class RepeatCommand implements ICommand{
 
-	private static StopCommand instance;
-
-	private StopCommand() {
-	}
-
+private static RepeatCommand instance;
+	
+	private RepeatCommand() {}
+	
 	@Override
 	public void handle(GuildMessageReceivedEvent event) {
 		TextChannel channel = event.getChannel();
@@ -39,19 +38,18 @@ public class StopCommand implements ICommand {
 			channel.sendMessage(":x: **You need to be in the same voice channel as me for this to work**").queue();
 			return;
 		}
-
+		
 		final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(guild);
-		musicManager.scheduler.player.stopTrack();
-		musicManager.scheduler.queue.clear();
-		channel.sendMessage(":loud_sound: The player has been stopped and the queue has been cleared").queue();
-
+		musicManager.scheduler.repeating = !musicManager.scheduler.repeating;
+		
+		channel.sendMessageFormat(":repeat: %s :repeat:", musicManager.scheduler.repeating ? "Enabled" : "Disabled").queue();
 	}
-
-	public static StopCommand getInstance() {
-		if (instance == null) {
-			instance = new StopCommand();
+	
+	public static RepeatCommand getInstance() {
+		if(instance == null) {
+			instance = new RepeatCommand();
 		}
-
+		
 		return instance;
 	}
 

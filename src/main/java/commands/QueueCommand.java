@@ -22,6 +22,7 @@ public class QueueCommand implements ICommand {
 
 	@Override
 	public void handle(GuildMessageReceivedEvent event) {
+		//TODO make a warning when calling the method while not in a voice channel
 		final TextChannel channel = event.getChannel();
 		final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
 		final BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
@@ -39,6 +40,7 @@ public class QueueCommand implements ICommand {
 			final AudioTrack track = trackList.get(i);
 			final AudioTrackInfo info = track.getInfo();
 			
+			//TODO too big message exception :  java.lang.IllegalArgumentException: A message may not exceed 2000 characters. Please limit your input!
 			messageAction.append("#").append(String.valueOf(i + 1)).append(" `").append(info.title).append(" by ")
 					.append(info.author).append("` [`").append(formatTime(track.getDuration())).append("`]\n");
 		}

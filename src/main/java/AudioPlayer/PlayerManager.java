@@ -57,6 +57,14 @@ public class PlayerManager {
 				//TODO add only one song if it is a simple search
 				List<AudioTrack> tracks = playList.getTracks();
 				
+				String playListName = playList.getName();
+				if(playListName.contains("Search results for: ")) {
+					AudioTrack track = playList.getTracks().get(0);
+					musicManager.scheduler.queue(track);
+					channel.sendMessage("Adding to queue: `").append(track.getInfo().title).append("` by `")
+					.append(track.getInfo().author).append("`").queue();
+					return;
+				}
 				
 				for(AudioTrack track : tracks) {
 					musicManager.scheduler.queue(track);
@@ -68,7 +76,7 @@ public class PlayerManager {
 
 			@Override
 			public void noMatches() {
-				// TODO Auto-generated method stub
+				channel.sendMessage(":x:**No matches found**").queue();
 
 			}
 
