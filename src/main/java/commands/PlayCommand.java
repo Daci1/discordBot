@@ -63,6 +63,7 @@ public class PlayCommand implements ICommand {
 			channel.sendMessage(":x: **You need to be in the same voice channel as me for this to work**").queue();
 			return;
 			}
+		System.out.println(url);
 		PlayerManager.getInstance().loadAndPlay(channel, url);
 
 	}
@@ -75,7 +76,7 @@ public class PlayCommand implements ICommand {
 	}
 	
 	private boolean isUrl(String url) {
-		return url.startsWith("https://") || url.startsWith("http://");
+		return  !url.contains("playlist") && (url.startsWith("https://") || url.startsWith("http://"));
 	}
 
 }
