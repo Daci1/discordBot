@@ -10,8 +10,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
 public class TrackScheduler extends AudioEventAdapter{
 	
-	private final AudioPlayer player;
-	private final BlockingQueue<AudioTrack> queue;
+	public final AudioPlayer player;
+	public BlockingQueue<AudioTrack> queue;
 	
 	public TrackScheduler(AudioPlayer player) {
 		this.player = player;
@@ -34,4 +34,8 @@ public class TrackScheduler extends AudioEventAdapter{
 			nextTrack();
 		}
 	}
+	
+//	public void newQueue() {
+//		this.queue = new LinkedBlockingQueue<AudioTrack>();
+//	}
 }
