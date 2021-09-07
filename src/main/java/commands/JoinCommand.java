@@ -15,6 +15,7 @@ public class JoinCommand implements ICommand {
 
 	@Override
 	public void handle(GuildMessageReceivedEvent event) {
+		//TODO already connected here
 		VoiceChannel channel = event.getMember().getVoiceState().getChannel();
 		TextChannel textChannel = event.getChannel();
 		try {
@@ -25,7 +26,7 @@ public class JoinCommand implements ICommand {
 			textChannel.sendMessage(":x: **I don't have permission to join the voice channel: `" + channel.getName() + "`**")
 					.queue();
 		} catch (IllegalArgumentException e) {
-			textChannel.sendMessage(":x: **You are not not connected a voice channel**").queue();
+			textChannel.sendMessage(":x: **You are  not connected to a voice channel**").queue();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
