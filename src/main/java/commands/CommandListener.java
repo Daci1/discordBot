@@ -23,7 +23,7 @@ public class CommandListener extends ListenerAdapter {
 			// creates the command class from the first argument, taking the text without
 			// the prefix and making it upper case
 			String commandClass = "commands." + args[0].substring(1, 2).toUpperCase() + args[0].substring(2)
-					+ "Command"; 
+					+ "Command";
 			try {
 				Class<?> cls = Class.forName(commandClass); // get the class
 				Method method = cls.getMethod("getInstance", null); // declare the method for the command instance

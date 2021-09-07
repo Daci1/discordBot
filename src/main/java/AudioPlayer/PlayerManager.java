@@ -40,12 +40,12 @@ public class PlayerManager {
 
 	public void loadAndPlay(TextChannel channel, String trackUrl) {
 		final GuildMusicManager musicManager = this.getMusicManager(channel.getGuild());
-		
+
 		this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
 
 			@Override
 			public void trackLoaded(AudioTrack track) {
-				
+
 				musicManager.scheduler.queue(track);
 				channel.sendMessage("Adding to queue: `").append(track.getInfo().title).append("` by `")
 						.append(track.getInfo().author).append("`").queue();
@@ -54,24 +54,24 @@ public class PlayerManager {
 
 			@Override
 			public void playlistLoaded(AudioPlaylist playList) {
-				//TODO add only one song if it is a simple search
+				// TODO add only one song if it is a simple search
 				List<AudioTrack> tracks = playList.getTracks();
-				
+
 				String playListName = playList.getName();
-				if(playListName.contains("Search results for: ")) {
+				if (playListName.contains("Search results for: ")) {
 					AudioTrack track = playList.getTracks().get(0);
 					musicManager.scheduler.queue(track);
 					channel.sendMessage("Adding to queue: `").append(track.getInfo().title).append("` by `")
-					.append(track.getInfo().author).append("`").queue();
+							.append(track.getInfo().author).append("`").queue();
 					return;
 				}
-				
-				for(AudioTrack track : tracks) {
+
+				for (AudioTrack track : tracks) {
 					musicManager.scheduler.queue(track);
 				}
-				
-				channel.sendMessage("Adding to queue: `").append(String.valueOf(tracks.size())).append("` tracks from playlist `")
-				.append(playList.getName()).append("`").queue();
+
+				channel.sendMessage("Adding to queue: `").append(String.valueOf(tracks.size()))
+						.append("` tracks from playlist `").append(playList.getName()).append("`").queue();
 			}
 
 			@Override
