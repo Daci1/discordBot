@@ -40,7 +40,6 @@ public class PlayerManager {
 
 	public void loadAndPlay(TextChannel channel, String trackUrl) {
 		final GuildMusicManager musicManager = this.getMusicManager(channel.getGuild());
-
 		this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
 
 			@Override
@@ -58,6 +57,7 @@ public class PlayerManager {
 				List<AudioTrack> tracks = playList.getTracks();
 
 				String playListName = playList.getName();
+				System.out.println(playListName);
 				if (playListName.contains("Search results for: ")) {
 					AudioTrack track = playList.getTracks().get(0);
 					musicManager.scheduler.queue(track);
