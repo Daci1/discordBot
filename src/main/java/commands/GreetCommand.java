@@ -1,16 +1,15 @@
 package commands;
 
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class GreetCommand implements ICommand {
 
 	public static GreetCommand instance;
 
 	private GreetCommand() {
-	};
+	}
 
-	public void handle(GuildMessageReceivedEvent event) {
+	public void handle(MessageReceivedEvent event) {
 		event.getChannel().sendMessage("Hi " + event.getAuthor().getAsMention()).queue();
 	}
 

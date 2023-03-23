@@ -1,8 +1,8 @@
 package commands;
 
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.AudioManager;
 
@@ -14,10 +14,10 @@ public class JoinCommand implements ICommand {
 	}
 
 	@Override
-	public void handle(GuildMessageReceivedEvent event) {
+	public void handle(MessageReceivedEvent event) {
 		//TODO already connected here
-		VoiceChannel channel = event.getMember().getVoiceState().getChannel();
-		TextChannel textChannel = event.getChannel();
+		AudioChannel channel = event.getMember().getVoiceState().getChannel();
+		MessageChannel textChannel = event.getChannel();
 		try {
 			AudioManager audioManager = event.getGuild().getAudioManager();
 			audioManager.openAudioConnection(channel);

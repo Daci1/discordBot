@@ -1,11 +1,11 @@
 package commands;
 
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public interface ICommand {
-	public static String prefix = ".";
-	public static String userID = "284763028178599936"; // creator id
+	static String prefix = ".";
+	static String userID = "284763028178599936"; // creator id
 
-	public abstract void handle(GuildMessageReceivedEvent event);
+	abstract void handle(MessageReceivedEvent event);
 
 }

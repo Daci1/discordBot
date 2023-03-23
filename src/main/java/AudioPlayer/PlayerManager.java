@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.discord.bot.daci_bot.App;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -14,7 +13,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 public class PlayerManager {
 	private static PlayerManager instance;
@@ -38,16 +37,16 @@ public class PlayerManager {
 		});
 	}
 
-	public void loadAndPlay(TextChannel channel, String trackUrl) {
-		final GuildMusicManager musicManager = this.getMusicManager(channel.getGuild());
+	public void loadAndPlay(MessageChannel channel, String trackUrl, Guild guild) {
+		final GuildMusicManager musicManager = this.getMusicManager(guild);
 		this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
 
 			@Override
 			public void trackLoaded(AudioTrack track) {
 
 				musicManager.scheduler.queue(track);
-				channel.sendMessage("Adding to queue: `").append(track.getInfo().title).append("` by `")
-						.append(track.getInfo().author).append("`").queue();
+				channel.sendMessage("Adding to queue: `").addContent(track.getInfo().title).addContent("` by `")
+						.addContent(track.getInfo().author).addContent("`").queue();
 
 			}
 
@@ -57,12 +56,11 @@ public class PlayerManager {
 				List<AudioTrack> tracks = playList.getTracks();
 
 				String playListName = playList.getName();
-				System.out.println(playListName);
 				if (playListName.contains("Search results for: ")) {
 					AudioTrack track = playList.getTracks().get(0);
 					musicManager.scheduler.queue(track);
-					channel.sendMessage("Adding to queue: `").append(track.getInfo().title).append("` by `")
-							.append(track.getInfo().author).append("`").queue();
+					channel.sendMessage("Adding to queue: `").addContent(track.getInfo().title).addContent("` by `")
+							.addContent(track.getInfo().author).addContent("`").queue();
 					return;
 				}
 
@@ -70,8 +68,8 @@ public class PlayerManager {
 					musicManager.scheduler.queue(track);
 				}
 
-				channel.sendMessage("Adding to queue: `").append(String.valueOf(tracks.size()))
-						.append("` tracks from playlist `").append(playList.getName()).append("`").queue();
+				channel.sendMessage("Adding to queue: `").addContent(String.valueOf(tracks.size()))
+						.addContent("` tracks from playlist `").addContent(playList.getName()).addContent("`").queue();
 			}
 
 			@Override

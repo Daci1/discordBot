@@ -10,9 +10,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
 import AudioPlayer.GuildMusicManager;
 import AudioPlayer.PlayerManager;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
 
 public class QueueCommand implements ICommand {
 	private static QueueCommand instance;
@@ -21,9 +21,9 @@ public class QueueCommand implements ICommand {
 	}
 
 	@Override
-	public void handle(GuildMessageReceivedEvent event) {
+	public void handle(MessageReceivedEvent event) {
 		//TODO make a warning when calling the method while not in a voice channel
-		final TextChannel channel = event.getChannel();
+		final MessageChannel channel = event.getChannel();
 		final GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
 		final BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
 		
@@ -34,19 +34,18 @@ public class QueueCommand implements ICommand {
 		
 		final int trackCount = Math.min(queue.size(), 20);
 		final List<AudioTrack> trackList = new ArrayList(queue);
-		final MessageAction messageAction = channel.sendMessage("**Current queue:**\n");
-		System.out.println(trackCount);
+		final MessageCreateAction messageAction = channel.sendMessage("**Current queue:**\n");
 		for(int i = 0; i < trackCount; i++) {
 			final AudioTrack track = trackList.get(i);
 			final AudioTrackInfo info = track.getInfo();
 			
 			//TODO too big message exception :  java.lang.IllegalArgumentException: A message may not exceed 2000 characters. Please limit your input!
-			messageAction.append("#").append(String.valueOf(i + 1)).append(" `").append(info.title).append(" by ")
-					.append(info.author).append("` [`").append(formatTime(track.getDuration())).append("`]\n");
+			messageAction.addContent("#").addContent(String.valueOf(i + 1)).addContent(" `").addContent(info.title).addContent(" by ")
+					.addContent(info.author).addContent("` [`").addContent(formatTime(track.getDuration())).addContent("`]\n");
 		}
 		
 		if(trackList.size() > trackCount) {
-			messageAction.append("And `").append(String.valueOf(trackList.size() - trackCount)).append("` more...");
+			messageAction.addContent("And `").addContent(String.valueOf(trackList.size() - trackCount)).addContent("` more...");
 		}
 		
 		messageAction.queue();

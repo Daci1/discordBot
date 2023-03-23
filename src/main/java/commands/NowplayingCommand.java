@@ -10,8 +10,8 @@ import AudioPlayer.PlayerManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class NowplayingCommand implements ICommand{
 
@@ -20,14 +20,14 @@ private static NowplayingCommand instance;
 	private NowplayingCommand() {}
 	
 	@Override
-	public void handle(GuildMessageReceivedEvent event) {
-		TextChannel channel = event.getChannel();
+	public void handle(MessageReceivedEvent event) {
+		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 		Member self = guild.getMember(App.getBot().getSelfUser());
 		GuildVoiceState selfVoiceState = self.getVoiceState();
 		Member member = event.getMember();
 
-		if (!selfVoiceState.inVoiceChannel()) {
+		if (!selfVoiceState.inAudioChannel()) {
 			channel.sendMessage(":mute: There is no track playing currently").queue();
 			return;
 		}

@@ -1,12 +1,8 @@
 package commands;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.discord.bot.daci_bot.App;
 
@@ -14,8 +10,8 @@ import AudioPlayer.PlayerManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class PlayCommand implements ICommand {
 
@@ -24,9 +20,9 @@ public class PlayCommand implements ICommand {
 	private PlayCommand() {}
 
 	@Override
-	public void handle(GuildMessageReceivedEvent event) {
+	public void handle(MessageReceivedEvent event) {
 		List<String> args = new ArrayList<>(Arrays.asList(event.getMessage().getContentRaw().split(" ")));
-		TextChannel channel = event.getChannel();
+		MessageChannel channel = event.getChannel();
 		if (args.size() < 2) {
 			channel.sendMessage(":x:** No **` URL `** was provided **").queue();
 			return;
@@ -34,7 +30,7 @@ public class PlayCommand implements ICommand {
 		args.remove(0); //remove the command from the message
 		
 		StringBuilder builder = new StringBuilder();
-		args.forEach(string -> builder.append(string + " "));
+		args.forEach(string -> builder.append(string).append(" "));
 		String url = builder.toString();
 		String https = "https://";
 		if(url.startsWith(https)) {
@@ -52,12 +48,12 @@ public class PlayCommand implements ICommand {
 		Member member = event.getMember();
 		GuildVoiceState memberVoiceState = member.getVoiceState();
 		
-		if(!memberVoiceState.inVoiceChannel()) {
+		if(!memberVoiceState.inAudioChannel()) {
 			channel.sendMessage(":x: **You need to be in a voice channel for this to work**").queue();
 			return;
 		}
 		
-		if (!selfVoiceState.inVoiceChannel()) {
+		if (!selfVoiceState.inAudioChannel()) {
 //			channel.sendMessage(":x: **I need to be in a voice channel for this to work**	").queue();
 			JoinCommand.getInstance().handle(event);
 			
@@ -69,7 +65,7 @@ public class PlayCommand implements ICommand {
 			return;
 			}
 //		System.out.println(url);
-		PlayerManager.getInstance().loadAndPlay(channel, url);
+		PlayerManager.getInstance().loadAndPlay(channel, url, guild);
 
 	}
 

@@ -2,12 +2,8 @@ package commands;
 
 import java.lang.reflect.Method;
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.managers.AudioManager;
 
 public class CommandListener extends ListenerAdapter {
 
@@ -16,8 +12,8 @@ public class CommandListener extends ListenerAdapter {
 	private CommandListener() {
 	}
 
-	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-
+	@Override
+	public void onMessageReceived(MessageReceivedEvent event) {
 		String[] args = event.getMessage().getContentRaw().split(" ");
 		if (args[0].startsWith(ICommand.prefix)) {
 			// creates the command class from the first argument, taking the text without
@@ -36,10 +32,6 @@ public class CommandListener extends ListenerAdapter {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
-		System.out.println(event.getReactionEmote().getAsReactionCode());
 	}
 
 	public static CommandListener getInstance() {
