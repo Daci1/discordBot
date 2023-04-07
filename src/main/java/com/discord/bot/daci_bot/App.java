@@ -14,7 +14,6 @@ public class App {
 	private static JDA bot;
 
 	public static void main(String[] args) {
-		System.out.println(System.getenv("DISCORD_BOT_TOKEN"));
 		bot = JDABuilder
 				.createDefault(System.getenv("DISCORD_BOT_TOKEN"), GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
 				.setMemberCachePolicy(MemberCachePolicy.VOICE).build();
