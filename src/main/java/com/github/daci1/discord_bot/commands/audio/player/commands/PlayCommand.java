@@ -1,15 +1,16 @@
 package com.github.daci1.discord_bot.commands.audio.player.commands;
 
 
-import com.github.daci1.discord_bot.AudioPlayer.PlayerManager;
+import com.github.daci1.discord_bot.commands.CommandUtils;
+import com.github.daci1.discord_bot.services.MembersStateService;
+import com.github.daci1.discord_bot.services.PlayerManagerService;
 import com.github.daci1.discord_bot.DiscordBotService;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
-import com.github.daci1.discord_bot.commands.voice.channel.commands.JoinCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -27,10 +28,12 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
     private DiscordBotService discordBotService;
 
     @Autowired
-    private PlayerManager playerManager;
+    private PlayerManagerService playerManager;
 
     @Autowired
-    private JoinCommand joinCommand;
+    private MembersStateService membersStateService;
+
+    private static final String youtubeAbChannelRegex = "&ab_channel=.*";
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -55,6 +58,7 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
         }
 
         String https = "https://";
+        input = input.replaceAll(youtubeAbChannelRegex, "");
         if (input.startsWith(https)) {
             input = input.substring(https.length());
         }
@@ -64,25 +68,20 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
         }
 
         Guild guild = event.getGuild();
-        Member self = guild.getMember(discordBotService.getBotSelfUser());
-        GuildVoiceState selfVoiceState = self.getVoiceState();
-        Member member = event.getMember();
-        GuildVoiceState memberVoiceState = member.getVoiceState();
+        Member self = CommandUtils.getMemberFromGuildBySelfUser(guild, discordBotService.getBotSelfUser());
+        Member requester = event.getMember();
 
-        if (!memberVoiceState.inAudioChannel()) {
-            event.getHook().sendMessage(":x: **You need to be in a voice channel for this to work.**").queue();
+        if (membersStateService.replyIfRequesterNotInVoiceChannel(event, requester)) {
             return;
         }
 
-        if (!selfVoiceState.inAudioChannel()) {
-            joinCommand.handleEvent(event);
-        } else if (!memberVoiceState.getChannel().equals(selfVoiceState.getChannel())) {
-            event.getHook().sendMessage(":x: **You need to be in the same voice channel as me for this to work.**").queue();
+        AudioChannel audioChannel = event.getMember().getVoiceState().getChannel();
+        if (!membersStateService.isMemberInVoiceChannel(self) && !membersStateService.triesConnectingBotToVoice(event.getHook(), event.getGuild().getAudioManager(), audioChannel)) {
             return;
         }
 
         InteractionHook interactionHook = event.getHook();
-        playerManager.loadAndPlay(interactionHook, input, guild);
+        playerManager.loadAndPlay(interactionHook, guild, input);
 
     }
 

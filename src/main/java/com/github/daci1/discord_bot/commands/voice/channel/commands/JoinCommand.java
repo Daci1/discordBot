@@ -1,15 +1,16 @@
 package com.github.daci1.discord_bot.commands.voice.channel.commands;
 
 import com.github.daci1.discord_bot.DiscordBotService;
+import com.github.daci1.discord_bot.commands.CommandUtils;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
+import com.github.daci1.discord_bot.services.MembersStateService;
 import jakarta.annotation.PostConstruct;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,9 @@ public class JoinCommand extends ListenerAdapter implements ISlashCommand {
 
     @Autowired
     private DiscordBotService discordBotService;
+
+    @Autowired
+    private MembersStateService membersStateService;
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -29,18 +33,20 @@ public class JoinCommand extends ListenerAdapter implements ISlashCommand {
 
     @Override
     public void handleEvent(SlashCommandInteractionEvent event) {
-        //TODO already connected here
         AudioChannel channel = event.getMember().getVoiceState().getChannel();
-        try {
-            AudioManager audioManager = event.getGuild().getAudioManager();
-            audioManager.openAudioConnection(channel);
-            event.getHook().sendMessageFormat(":loud_sound: Joined `%s`.", channel.getName()).queue();
-        } catch (InsufficientPermissionException e) {
-            event.getHook().sendMessageFormat(":x: **I don't have permission to join the voice channel: `%s`.**", channel.getName()).queue();
-        } catch (IllegalArgumentException e) {
-            event.getHook().sendMessage(":x: **You are not connected to a voice channel.**").queue();
-        } catch (Exception e) {
-            e.printStackTrace();
+        Member requester = event.getMember();
+        Member self = CommandUtils.getMemberFromGuildBySelfUser(event.getGuild(), discordBotService.getBotSelfUser());
+
+        if (membersStateService.replyIfRequesterNotInVoiceChannel(event, requester)) {
+            return;
+        }
+
+        if (membersStateService.replyIfBotInVoiceChannel(event, self)) {
+            return;
+        }
+
+        if (!membersStateService.triesConnectingBotToVoice(event.getHook(), event.getGuild().getAudioManager(), channel)) {
+            return;
         }
     }
 
