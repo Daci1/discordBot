@@ -77,7 +77,7 @@ public class PlayerManagerService {
             final AudioTrack track = trackList.get(i);
             final AudioTrackInfo info = track.getInfo();
 
-            String content = String.format("#%s by `%s  [`%s`]`\n", i + 1, info.title, info.author, formatTime(track.getDuration()));
+            String content = String.format("#%s `%s by %s` [`%s`]\n", i + 1, info.title, info.author, formatTime(track.getDuration()));
 
             if (messageAction.getContent().length() + content.length() > 2000) {
                 break;
@@ -181,8 +181,7 @@ public class PlayerManagerService {
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                // TODO Auto-generated method stub
-
+                interactionHook.sendMessage(":x: **Some error happened** :x:");
             }
         });
     }

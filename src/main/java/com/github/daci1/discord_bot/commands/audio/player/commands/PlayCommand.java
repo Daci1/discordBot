@@ -33,6 +33,8 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
     @Autowired
     private MembersStateService membersStateService;
 
+    private static final String youtubeAbChannelRegex = "&ab_channel=.*";
+
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (event.getName().equals(SlashCommand.PLAY.getName())) {
@@ -56,6 +58,7 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
         }
 
         String https = "https://";
+        input = input.replaceAll(youtubeAbChannelRegex, "");
         if (input.startsWith(https)) {
             input = input.substring(https.length());
         }
