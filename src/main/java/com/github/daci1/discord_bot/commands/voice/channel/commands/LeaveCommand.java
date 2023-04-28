@@ -3,6 +3,7 @@ package com.github.daci1.discord_bot.commands.voice.channel.commands;
 import com.github.daci1.discord_bot.DiscordBotService;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
+import com.github.daci1.discord_bot.services.MembersStateService;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -19,6 +20,9 @@ public class LeaveCommand extends ListenerAdapter implements ISlashCommand {
     @Autowired
     private DiscordBotService discordBotService;
 
+    @Autowired
+    private MembersStateService membersStateService;
+
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (event.getName().equals(SlashCommand.LEAVE.getName())) {
@@ -31,27 +35,24 @@ public class LeaveCommand extends ListenerAdapter implements ISlashCommand {
     public void handleEvent(SlashCommandInteractionEvent event) {
         Guild guild = event.getGuild();
         Member self = guild.getMember(discordBotService.getBotSelfUser());
-        GuildVoiceState selfVoiceState = self.getVoiceState();
-        Member member = event.getMember();
-        GuildVoiceState memberVoiceState = member.getVoiceState();
+        Member requester = event.getMember();
 
-        if (!memberVoiceState.inAudioChannel()) {
-            event.getHook().sendMessage(":x: **You need to be in a voice channel for this to work**").queue();
+        if (membersStateService.replyIfRequesterNotInVoiceChannel(event, requester)) {
             return;
         }
 
-        if (!selfVoiceState.inAudioChannel()) {
-            event.getHook().sendMessage(":x: **I need to be in a voice channel for this to work**").queue();
+        if (membersStateService.replyIfBotNotInVoiceChannel(event, self)) {
             return;
+        }
 
-        } else if (!memberVoiceState.getChannel().equals(selfVoiceState.getChannel())) {
-            event.getHook().sendMessage(":x: **You need to be in the same voice channel as me for this to work**").queue();
+        if (membersStateService.replyIfBotNotInSameVoiceChannelAsRequester(event, self, requester)) {
             return;
         }
 
         final AudioManager audioManager = guild.getAudioManager();
         audioManager.closeAudioConnection();
 
+        GuildVoiceState selfVoiceState = self.getVoiceState();
         event.getHook().sendMessage("Leaving `" + selfVoiceState.getChannel().getName() + "` :hand_splayed:").queue();
     }
 

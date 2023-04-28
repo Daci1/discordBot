@@ -12,7 +12,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 
 import com.github.daci1.discord_bot.AudioPlayer.GuildMusicManager;
-import com.github.daci1.discord_bot.AudioPlayer.PlayerManager;
+import com.github.daci1.discord_bot.services.PlayerManagerService;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 public class QueueCommand extends ListenerAdapter implements ISlashCommand {
 
     @Autowired
-    private PlayerManager playerManager;
+    private PlayerManagerService playerManager;
 
     @Autowired
     private DiscordBotService discordBotService;

@@ -1,7 +1,8 @@
 package com.github.daci1.discord_bot.commands.audio.player.commands;
 
 import com.github.daci1.discord_bot.AudioPlayer.GuildMusicManager;
-import com.github.daci1.discord_bot.AudioPlayer.PlayerManager;
+import com.github.daci1.discord_bot.services.MembersStateService;
+import com.github.daci1.discord_bot.services.PlayerManagerService;
 import com.github.daci1.discord_bot.DiscordBotService;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
@@ -25,7 +26,10 @@ public class NowPlayingCommand extends ListenerAdapter implements ISlashCommand 
     private DiscordBotService discordBotService;
 
     @Autowired
-    private PlayerManager playerManager;
+    private MembersStateService membersStateService;
+
+    @Autowired
+    private PlayerManagerService playerManager;
 
 
     @Override
@@ -42,7 +46,7 @@ public class NowPlayingCommand extends ListenerAdapter implements ISlashCommand 
         Member self = guild.getMember(discordBotService.getBotSelfUser());
         GuildVoiceState selfVoiceState = self.getVoiceState();
 
-        if (!selfVoiceState.inAudioChannel()) {
+        if (!membersStateService.isMemberInVoiceChannel(self)) {
             event.getHook().sendMessage(":x: I am not playing anything at the moment.").queue();
             return;
         }
