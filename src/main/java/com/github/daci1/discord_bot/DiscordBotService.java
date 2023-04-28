@@ -48,7 +48,8 @@ public class DiscordBotService {
                 Commands.slash(SlashCommand.REPEAT.getName(), "Toggles repeat for the current playing track."),
                 Commands.slash(SlashCommand.SKIP.getName(), "Skips the current playing track."),
                 Commands.slash(SlashCommand.STOP.getName(), "Stops and clears the current queue."),
-                Commands.slash(SlashCommand.LEAVE.getName(), "Leaves the current voice channel.")
+                Commands.slash(SlashCommand.LEAVE.getName(), "Leaves the current voice channel."),
+                Commands.slash(SlashCommand.PAUSE.getName(), "Pauses the current playing track.")
         ).queue();
     }
 }

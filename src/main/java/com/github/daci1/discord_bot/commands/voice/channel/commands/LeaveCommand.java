@@ -6,11 +6,9 @@ import com.github.daci1.discord_bot.commands.SlashCommand;
 import com.github.daci1.discord_bot.services.MembersStateService;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,11 +47,8 @@ public class LeaveCommand extends ListenerAdapter implements ISlashCommand {
             return;
         }
 
-        final AudioManager audioManager = guild.getAudioManager();
-        audioManager.closeAudioConnection();
-
-        GuildVoiceState selfVoiceState = self.getVoiceState();
-        event.getHook().sendMessage("Leaving `" + selfVoiceState.getChannel().getName() + "` :hand_splayed:").queue();
+        this.membersStateService.disconnectBotFromVoiceChannel(event.getGuild().getAudioManager());
+        event.getHook().sendMessage("Leaving `" + self.getVoiceState().getChannel().getName() + "` :hand_splayed:").queue();
     }
 
     @Override

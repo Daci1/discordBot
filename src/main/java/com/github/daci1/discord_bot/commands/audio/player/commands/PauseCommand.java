@@ -1,12 +1,10 @@
 package com.github.daci1.discord_bot.commands.audio.player.commands;
 
-import com.github.daci1.discord_bot.commands.CommandUtils;
-import com.github.daci1.discord_bot.services.MembersStateService;
-import com.github.daci1.discord_bot.services.PlayerManagerService;
 import com.github.daci1.discord_bot.DiscordBotService;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
-
+import com.github.daci1.discord_bot.services.MembersStateService;
+import com.github.daci1.discord_bot.services.PlayerManagerService;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -16,20 +14,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SkipCommand extends ListenerAdapter implements ISlashCommand {
+public class PauseCommand extends ListenerAdapter implements ISlashCommand {
 
     @Autowired
     private DiscordBotService discordBotService;
 
     @Autowired
-    private PlayerManagerService playerManager;
+    private PlayerManagerService playerManagerService;
 
     @Autowired
     private MembersStateService membersStateService;
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals(SlashCommand.SKIP.getName())) {
+        if (event.getName().equals(SlashCommand.PAUSE.getName())) {
             event.deferReply().queue();
             this.handleEvent(event);
         }
@@ -38,7 +36,7 @@ public class SkipCommand extends ListenerAdapter implements ISlashCommand {
     @Override
     public void handleEvent(SlashCommandInteractionEvent event) {
         Guild guild = event.getGuild();
-        Member self = CommandUtils.getMemberFromGuildBySelfUser(guild, discordBotService.getBotSelfUser());
+        Member self = guild.getMember(discordBotService.getBotSelfUser());
         Member requester = event.getMember();
 
         if (membersStateService.replyIfRequesterNotInVoiceChannel(event, requester)) {
@@ -53,11 +51,11 @@ public class SkipCommand extends ListenerAdapter implements ISlashCommand {
             return;
         }
 
-        final boolean skippedSuccessful = playerManager.skipCurrentTrack(guild);
-        if (skippedSuccessful) {
-            event.getHook().sendMessage(":x: **There is no track playing currently**").queue();
+        final boolean isPaused = this.playerManagerService.pause(event.getGuild());
+        if (isPaused) {
+            event.getHook().sendMessage(":pause_button: **Paused playing current track.**").queue();
         } else {
-            event.getHook().sendMessage(":loud_sound: Skipped the current track").queue();
+            event.getHook().sendMessage(":arrow_forward: **Resumed playing current track.**").queue();
         }
     }
 
