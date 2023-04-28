@@ -1,6 +1,5 @@
 package com.github.daci1.discord_bot.commands.audio.player.commands;
 
-import com.github.daci1.discord_bot.AudioPlayer.GuildMusicManager;
 import com.github.daci1.discord_bot.services.MembersStateService;
 import com.github.daci1.discord_bot.services.PlayerManagerService;
 import com.github.daci1.discord_bot.DiscordBotService;
@@ -21,7 +20,7 @@ public class StopCommand extends ListenerAdapter implements ISlashCommand {
     private DiscordBotService discordBotService;
 
     @Autowired
-    private PlayerManagerService playerManager;
+    private PlayerManagerService playerManagerService;
 
     @Autowired
     private MembersStateService membersStateService;
@@ -52,10 +51,7 @@ public class StopCommand extends ListenerAdapter implements ISlashCommand {
             return;
         }
 
-        final GuildMusicManager musicManager = playerManager.getMusicManager(guild);
-        musicManager.scheduler.player.stopTrack();
-        musicManager.scheduler.queue.clear();
-        event.getHook().sendMessage(":loud_sound: The player has been stopped and the queue has been cleared").queue();
+        playerManagerService.stopAndClearQueue(event.getHook(), guild);
 
     }
 

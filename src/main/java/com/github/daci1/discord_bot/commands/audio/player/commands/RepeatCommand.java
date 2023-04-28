@@ -1,6 +1,5 @@
 package com.github.daci1.discord_bot.commands.audio.player.commands;
 
-import com.github.daci1.discord_bot.AudioPlayer.GuildMusicManager;
 import com.github.daci1.discord_bot.commands.CommandUtils;
 import com.github.daci1.discord_bot.services.MembersStateService;
 import com.github.daci1.discord_bot.services.PlayerManagerService;
@@ -17,12 +16,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RepeatCommand extends ListenerAdapter implements ISlashCommand {
-    
+
     @Autowired
     private DiscordBotService discordBotService;
 
     @Autowired
-    private PlayerManagerService playerManager;
+    private PlayerManagerService playerManagerService;
 
     @Autowired
     private MembersStateService membersStateService;
@@ -53,10 +52,7 @@ public class RepeatCommand extends ListenerAdapter implements ISlashCommand {
             return;
         }
 
-        final GuildMusicManager musicManager = playerManager.getMusicManager(guild);
-        musicManager.scheduler.repeating = !musicManager.scheduler.repeating;
-
-        event.getHook().sendMessageFormat(":repeat: Repeat %s :repeat:", musicManager.scheduler.repeating ? "Enabled" : "Disabled").queue();
+        playerManagerService.repeatCurrentSong(event.getHook(), guild);
     }
 
     @Override

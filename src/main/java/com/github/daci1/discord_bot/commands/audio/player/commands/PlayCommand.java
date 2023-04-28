@@ -72,17 +72,13 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
             return;
         }
 
-        if (membersStateService.replyIfBotInVoiceChannel(event, self)) {
-            return;
-        }
-
         AudioChannel audioChannel = event.getMember().getVoiceState().getChannel();
-        if (!membersStateService.triesConnectingBotToVoice(event.getHook(), event.getGuild().getAudioManager(), audioChannel)) {
+        if (!membersStateService.isMemberInVoiceChannel(self) && !membersStateService.triesConnectingBotToVoice(event.getHook(), event.getGuild().getAudioManager(), audioChannel)) {
             return;
         }
 
         InteractionHook interactionHook = event.getHook();
-        playerManager.loadAndPlay(interactionHook, input, guild);
+        playerManager.loadAndPlay(interactionHook, guild, input);
 
     }
 

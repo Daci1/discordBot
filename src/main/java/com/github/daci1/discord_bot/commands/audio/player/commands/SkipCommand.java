@@ -6,9 +6,7 @@ import com.github.daci1.discord_bot.services.PlayerManagerService;
 import com.github.daci1.discord_bot.DiscordBotService;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
-import com.github.daci1.discord_bot.AudioPlayer.GuildMusicManager;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -55,14 +53,7 @@ public class SkipCommand extends ListenerAdapter implements ISlashCommand {
             return;
         }
 
-        final GuildMusicManager musicManager = playerManager.getMusicManager(guild);
-        final AudioPlayer audioPlayer = musicManager.audioPlayer;
-        if (audioPlayer.getPlayingTrack() == null) {
-            event.getHook().sendMessage(":x: **There is no track playing currently**").queue();
-            return;
-        }
-        musicManager.scheduler.nextTrack();
-        event.getHook().sendMessage(":loud_sound: Skipped the current track").queue();
+        playerManager.skipCurrentTrack(event.getHook(), guild);
     }
 
     @Override
