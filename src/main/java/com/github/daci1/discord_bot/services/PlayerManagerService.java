@@ -19,7 +19,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
 import org.springframework.stereotype.Component;
 
@@ -36,15 +38,14 @@ public class PlayerManagerService {
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
     }
 
-    public void skipCurrentTrack(InteractionHook interactionHook, Guild guild) {
+    public boolean skipCurrentTrack(Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
         final AudioPlayer audioPlayer = musicManager.audioPlayer;
         if (audioPlayer.getPlayingTrack() == null) {
-            interactionHook.sendMessage(":x: **There is no track playing currently**").queue();
-            return;
+            return false;
         }
         musicManager.scheduler.nextTrack();
-        interactionHook.sendMessage(":loud_sound: Skipped the current track").queue();
+        return true;
     }
 
     public void stopAndClearQueue(InteractionHook interactionHook, Guild guild) {
@@ -54,11 +55,22 @@ public class PlayerManagerService {
         interactionHook.sendMessage(":loud_sound: The player has been stopped and the queue has been cleared").queue();
     }
 
-    public void repeatCurrentSong(InteractionHook interactionHook, Guild guild) {
+    public boolean pause(Guild guild) {
+        final GuildMusicManager musicManager = this.getMusicManager(guild);
+
+        if (!musicManager.scheduler.player.isPaused()) {
+            musicManager.scheduler.pause();
+            return true;
+        } else {
+            musicManager.scheduler.resume();
+            return false;
+        }
+    }
+
+    public boolean repeatCurrentSong(Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
         musicManager.scheduler.repeating = !musicManager.scheduler.repeating;
-
-        interactionHook.sendMessageFormat(":repeat: Repeat %s :repeat:", musicManager.scheduler.repeating ? "Enabled" : "Disabled").queue();
+        return musicManager.scheduler.repeating;
     }
 
     public void displayQueue(InteractionHook interactionHook, Guild guild) {
@@ -100,7 +112,6 @@ public class PlayerManagerService {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
         final AudioPlayer audioPlayer = musicManager.audioPlayer;
         final AudioTrack audioTrack = audioPlayer.getPlayingTrack();
-
         if (audioTrack == null) {
             interactionHook.sendMessage(":mute: There is no track playing currently.").queue();
             return;
@@ -136,12 +147,12 @@ public class PlayerManagerService {
             public void trackLoaded(AudioTrack track) {
 
                 musicManager.scheduler.queue(track);
-                interactionHook.sendMessage("Adding to queue: `")
+                WebhookMessageCreateAction<Message> trackMessage = interactionHook.sendMessage("Adding to queue: `")
                         .addContent(track.getInfo().title)
                         .addContent("` by `")
                         .addContent(track.getInfo().author)
-                        .addContent("`")
-                        .queue();
+                        .addContent("`");
+                setButtonInteractions(trackMessage).queue();
             }
 
             @Override
@@ -153,12 +164,12 @@ public class PlayerManagerService {
                 if (playListName.contains("Search results for: ")) {
                     AudioTrack track = playList.getTracks().get(0);
                     musicManager.scheduler.queue(track);
-                    interactionHook.sendMessage("Adding to queue: `")
+                    WebhookMessageCreateAction<Message> trackMessage = interactionHook.sendMessage("Adding to queue: `")
                             .addContent(track.getInfo().title)
                             .addContent("` by `")
                             .addContent(track.getInfo().author)
-                            .addContent("`")
-                            .queue();
+                            .addContent("`");
+                    setButtonInteractions(trackMessage).queue();
                     return;
                 }
 
@@ -166,12 +177,13 @@ public class PlayerManagerService {
                     musicManager.scheduler.queue(track);
                 }
 
-                interactionHook.sendMessage("Adding to queue: `")
+                WebhookMessageCreateAction<Message> queueMessage = interactionHook.sendMessage("Adding to queue: `")
                         .addContent(String.valueOf(tracks.size()))
                         .addContent("` tracks from playlist `")
                         .addContent(playList.getName())
-                        .addContent("`")
-                        .queue();
+                        .addContent("`");
+
+                setButtonInteractions(queueMessage).queue();
             }
 
             @Override
@@ -184,5 +196,15 @@ public class PlayerManagerService {
                 interactionHook.sendMessage(":x: **Some error happened** :x:");
             }
         });
+    }
+
+    public WebhookMessageCreateAction<Message> setButtonInteractions(WebhookMessageCreateAction<Message> webhookMessageCreateAction) {
+        return webhookMessageCreateAction
+                .setActionRow(
+                        Button.primary("repeat", Emoji.fromUnicode("U+1F501")),
+                        Button.primary("pause", Emoji.fromUnicode("U+23EF")),
+                        Button.primary("skip", Emoji.fromUnicode("U+23ED")),
+                        Button.danger("leave", Emoji.fromUnicode("U+1F44B"))
+                );
     }
 }

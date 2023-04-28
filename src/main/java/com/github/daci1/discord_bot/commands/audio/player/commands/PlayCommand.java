@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
     private DiscordBotService discordBotService;
 
     @Autowired
-    private PlayerManagerService playerManager;
+    private PlayerManagerService playerManagerService;
 
     @Autowired
     private MembersStateService membersStateService;
@@ -76,13 +77,58 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
         }
 
         AudioChannel audioChannel = event.getMember().getVoiceState().getChannel();
-        if (!membersStateService.isMemberInVoiceChannel(self) && !membersStateService.triesConnectingBotToVoice(event.getHook(), event.getGuild().getAudioManager(), audioChannel)) {
+        if (!membersStateService.isMemberInVoiceChannel(self) && !membersStateService.triesConnectingBotToVoiceChannel(event.getHook(), event.getGuild().getAudioManager(), audioChannel)) {
             return;
         }
 
         InteractionHook interactionHook = event.getHook();
-        playerManager.loadAndPlay(interactionHook, guild, input);
+        playerManagerService.loadAndPlay(interactionHook, guild, input);
 
+    }
+
+    @Override
+    public void onButtonInteraction(ButtonInteractionEvent event) {
+        Member requester = event.getMember();
+        Member self = event.getGuild().getMember(this.discordBotService.getBotSelfUser());
+        if (membersStateService.replyIfRequesterNotInVoiceChannel(event, requester)) {
+            return;
+        }
+
+        if (membersStateService.replyIfBotNotInVoiceChannel(event, self)) {
+            return;
+        }
+
+        if (membersStateService.replyIfBotNotInSameVoiceChannelAsRequester(event, self, requester)) {
+            return;
+        }
+
+        switch (event.getComponentId()) {
+            case "repeat":
+                final boolean isRepeatingEnabled = this.playerManagerService.repeatCurrentSong(event.getGuild());
+                event.editMessageFormat(":repeat: Repeat %s :repeat:", isRepeatingEnabled ? "Enabled" : "Disabled").queue();
+                break;
+            case "pause":
+                final boolean isPaused = this.playerManagerService.pause(event.getGuild());
+                if (isPaused) {
+                    event.editMessage(":pause_button: **Paused playing current track.**").queue();
+                } else {
+                    event.editMessageFormat(":arrow_forward: **Resumed playing current track.**").queue();
+                }
+                break;
+            case "skip":
+                final boolean skippedSuccessful = this.playerManagerService.skipCurrentTrack(event.getGuild());
+                if (skippedSuccessful) {
+                    event.editMessage(":x: **There is no track playing currently**").queue();
+                } else {
+                    event.editMessage(":loud_sound: Skipped the current track").queue();
+                }
+                break;
+            case "leave":
+                event.getMessage().delete().queue();
+                this.membersStateService.disconnectBotFromVoiceChannel(event.getGuild().getAudioManager());
+                event.reply("Leaving `" + self.getVoiceState().getChannel().getName() + "` :hand_splayed:").queue();
+                break;
+        }
     }
 
     @Override

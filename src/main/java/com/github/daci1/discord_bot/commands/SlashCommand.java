@@ -8,7 +8,8 @@ public enum SlashCommand {
     REPEAT("repeat"),
     SKIP("skip"),
     STOP("stop"),
-    LEAVE("leave");
+    LEAVE("leave"),
+    PAUSE("pause");
 
 
     private final String commandName;

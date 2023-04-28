@@ -45,7 +45,7 @@ public class JoinCommand extends ListenerAdapter implements ISlashCommand {
             return;
         }
 
-        if (!membersStateService.triesConnectingBotToVoice(event.getHook(), event.getGuild().getAudioManager(), channel)) {
+        if (!membersStateService.triesConnectingBotToVoiceChannel(event.getHook(), event.getGuild().getAudioManager(), channel)) {
             return;
         }
     }
