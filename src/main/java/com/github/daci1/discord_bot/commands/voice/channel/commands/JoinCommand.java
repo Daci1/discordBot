@@ -1,6 +1,6 @@
 package com.github.daci1.discord_bot.commands.voice.channel.commands;
 
-import com.github.daci1.discord_bot.DiscordBotService;
+import com.github.daci1.discord_bot.services.DiscordBotService;
 import com.github.daci1.discord_bot.commands.CommandUtils;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
