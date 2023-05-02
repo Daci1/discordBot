@@ -4,10 +4,11 @@ package com.github.daci1.discord_bot.commands.audio.player.commands;
 import com.github.daci1.discord_bot.commands.CommandUtils;
 import com.github.daci1.discord_bot.services.MembersStateService;
 import com.github.daci1.discord_bot.services.PlayerManagerService;
-import com.github.daci1.discord_bot.DiscordBotService;
+import com.github.daci1.discord_bot.services.DiscordBotService;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
@@ -17,23 +18,17 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PlayCommand extends ListenerAdapter implements ISlashCommand {
 
     Logger logger = LoggerFactory.getLogger(PlayCommand.class);
 
-    @Autowired
-    private DiscordBotService discordBotService;
-
-    @Autowired
-    private PlayerManagerService playerManagerService;
-
-    @Autowired
-    private MembersStateService membersStateService;
-
+    private final DiscordBotService discordBotService;
+    private final PlayerManagerService playerManagerService;
+    private final MembersStateService membersStateService;
     private static final String youtubeAbChannelRegex = "&ab_channel=.*";
 
     @Override
@@ -103,31 +98,31 @@ public class PlayCommand extends ListenerAdapter implements ISlashCommand {
         }
 
         switch (event.getComponentId()) {
-            case "repeat":
+            case "repeat" -> {
                 final boolean isRepeatingEnabled = this.playerManagerService.repeatCurrentSong(event.getGuild());
                 event.editMessageFormat(":repeat: Repeat %s :repeat:", isRepeatingEnabled ? "Enabled" : "Disabled").queue();
-                break;
-            case "pause":
+            }
+            case "pause" -> {
                 final boolean isPaused = this.playerManagerService.pause(event.getGuild());
                 if (isPaused) {
                     event.editMessage(":pause_button: **Paused playing current track.**").queue();
                 } else {
                     event.editMessageFormat(":arrow_forward: **Resumed playing current track.**").queue();
                 }
-                break;
-            case "skip":
+            }
+            case "skip" -> {
                 final boolean skippedSuccessful = this.playerManagerService.skipCurrentTrack(event.getGuild());
                 if (skippedSuccessful) {
                     event.editMessage(":x: **There is no track playing currently**").queue();
                 } else {
                     event.editMessage(":loud_sound: Skipped the current track").queue();
                 }
-                break;
-            case "leave":
+            }
+            case "leave" -> {
                 event.getMessage().delete().queue();
                 this.membersStateService.disconnectBotFromVoiceChannel(event.getGuild().getAudioManager());
                 event.reply("Leaving `" + self.getVoiceState().getChannel().getName() + "` :hand_splayed:").queue();
-                break;
+            }
         }
     }
 

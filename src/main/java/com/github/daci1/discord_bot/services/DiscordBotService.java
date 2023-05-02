@@ -1,4 +1,4 @@
-package com.github.daci1.discord_bot;
+package com.github.daci1.discord_bot.services;
 
 import com.github.daci1.discord_bot.commands.SlashCommand;
 import jakarta.annotation.PostConstruct;
@@ -12,16 +12,22 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.managers.Presence;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DiscordBotService {
     private JDA discordBot;
+    private final String discordBotToken;
+
+    public DiscordBotService(@Value("${DISCORD_BOT_TOKEN}") final String discordBotToken) {
+        this.discordBotToken = discordBotToken;
+    }
 
     @PostConstruct
     private void initBot() {
         discordBot = JDABuilder
-                .createDefault(System.getenv("DISCORD_BOT_TOKEN"), GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
+                .createDefault(discordBotToken, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
                 .setMemberCachePolicy(MemberCachePolicy.VOICE).build();
 
         Presence botPresence = discordBot.getPresence();
