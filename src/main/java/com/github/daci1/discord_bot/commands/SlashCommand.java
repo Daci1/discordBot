@@ -6,6 +6,7 @@ public enum SlashCommand {
     NOW_PLAYING("now-playing"),
     QUEUE("queue"),
     REPEAT("repeat"),
+    REPEAT_QUEUE("repeat-queue"),
     SKIP("skip"),
     STOP("stop"),
     LEAVE("leave"),

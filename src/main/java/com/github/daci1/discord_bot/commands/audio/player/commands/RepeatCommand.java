@@ -49,7 +49,7 @@ public class RepeatCommand extends ListenerAdapter implements ISlashCommand {
         }
 
         final boolean isRepeatingEnabled = playerManagerService.repeatCurrentSong(guild);
-        event.getHook().sendMessageFormat(":repeat: Repeat %s :repeat:", isRepeatingEnabled ? "Enabled" : "Disabled").queue();
+        event.getHook().sendMessageFormat(":repeat: Repeat `%s` :repeat:", isRepeatingEnabled ? "Enabled" : "Disabled").queue();
 
     }
 

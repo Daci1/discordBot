@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.github.daci1.discord_bot.AudioPlayer.GuildMusicManager;
+import com.github.daci1.discord_bot.exceptions.RepeatEmptyQueueException;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -40,42 +41,46 @@ public class PlayerManagerService {
 
     public boolean skipCurrentTrack(Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
-        final AudioPlayer audioPlayer = musicManager.audioPlayer;
+        final AudioPlayer audioPlayer = musicManager.getAudioPlayer();
         if (audioPlayer.getPlayingTrack() == null) {
             return false;
         }
-        musicManager.scheduler.nextTrack();
+        musicManager.getScheduler().nextTrack();
         return true;
     }
 
     public void stopAndClearQueue(InteractionHook interactionHook, Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
-        musicManager.scheduler.player.stopTrack();
-        musicManager.scheduler.queue.clear();
+        musicManager.getAudioPlayer().stopTrack();
+        musicManager.getScheduler().clearQueues();
         interactionHook.sendMessage(":loud_sound: The player has been stopped and the queue has been cleared").queue();
     }
 
     public boolean pause(Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
 
-        if (!musicManager.scheduler.player.isPaused()) {
-            musicManager.scheduler.pause();
+        if (!musicManager.getScheduler().isPaused()) {
+            musicManager.getScheduler().pause();
             return true;
         } else {
-            musicManager.scheduler.resume();
+            musicManager.getScheduler().resume();
             return false;
         }
     }
 
     public boolean repeatCurrentSong(Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
-        musicManager.scheduler.repeating = !musicManager.scheduler.repeating;
-        return musicManager.scheduler.repeating;
+        return musicManager.toggleRepeating();
+    }
+
+    public boolean repeatCurrentQueue(Guild guild)  throws RepeatEmptyQueueException {
+        final GuildMusicManager musicManager = this.getMusicManager(guild);
+        return musicManager.toggleQueueRepeat();
     }
 
     public void displayQueue(InteractionHook interactionHook, Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
-        final BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
+        final BlockingQueue<AudioTrack> queue = musicManager.getScheduler().getQueue();
 
         if (queue.isEmpty()) {
             interactionHook.sendMessage("The queue is currently empty").queue();
@@ -110,7 +115,7 @@ public class PlayerManagerService {
 
     public void nowPlaying(InteractionHook interactionHook, Guild guild) {
         final GuildMusicManager musicManager = this.getMusicManager(guild);
-        final AudioPlayer audioPlayer = musicManager.audioPlayer;
+        final AudioPlayer audioPlayer = musicManager.getAudioPlayer();
         final AudioTrack audioTrack = audioPlayer.getPlayingTrack();
         if (audioTrack == null) {
             interactionHook.sendMessage(":mute: There is no track playing currently.").queue();
@@ -146,7 +151,7 @@ public class PlayerManagerService {
             @Override
             public void trackLoaded(AudioTrack track) {
 
-                musicManager.scheduler.queue(track);
+                musicManager.getScheduler().queue(track);
                 WebhookMessageCreateAction<Message> trackMessage = interactionHook.sendMessage("Adding to queue: `")
                         .addContent(track.getInfo().title)
                         .addContent("` by `")
@@ -163,7 +168,7 @@ public class PlayerManagerService {
                 String playListName = playList.getName();
                 if (playListName.contains("Search results for: ")) {
                     AudioTrack track = playList.getTracks().get(0);
-                    musicManager.scheduler.queue(track);
+                    musicManager.getScheduler().queue(track);
                     WebhookMessageCreateAction<Message> trackMessage = interactionHook.sendMessage("Adding to queue: `")
                             .addContent(track.getInfo().title)
                             .addContent("` by `")
@@ -174,7 +179,7 @@ public class PlayerManagerService {
                 }
 
                 for (AudioTrack track : tracks) {
-                    musicManager.scheduler.queue(track);
+                    musicManager.getScheduler().queue(track);
                 }
 
                 WebhookMessageCreateAction<Message> queueMessage = interactionHook.sendMessage("Adding to queue: `")
@@ -193,7 +198,7 @@ public class PlayerManagerService {
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                interactionHook.sendMessage(":x: **Some error happened** :x:");
+                interactionHook.sendMessage(":x: **Some error happened** :x:").queue();
             }
         });
     }
