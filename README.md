@@ -13,6 +13,7 @@ Here is a list of available commands:
 * `/now-playing`: This command will display information about the song that is currently playing.
 * `/queue`: This command will display the current song queue.
 * `/repeat`: This command will toggle the repeat mode on or off.
+* `/repeat-queue`: This command will toggle the repeat queue mode on or off.
 * `/skip`: This command will skip the current song and play the next song in the queue.
 * `/stop`: This command will stop the current song and clear the song queue.
 * `/leave`: This command will make the bot leave the voice channel.

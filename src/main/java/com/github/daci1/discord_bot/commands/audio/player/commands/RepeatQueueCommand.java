@@ -1,12 +1,12 @@
 package com.github.daci1.discord_bot.commands.audio.player.commands;
 
 import com.github.daci1.discord_bot.commands.CommandUtils;
-import com.github.daci1.discord_bot.services.MembersStateService;
-import com.github.daci1.discord_bot.services.PlayerManagerService;
-import com.github.daci1.discord_bot.services.DiscordBotService;
 import com.github.daci1.discord_bot.commands.ISlashCommand;
 import com.github.daci1.discord_bot.commands.SlashCommand;
-
+import com.github.daci1.discord_bot.exceptions.RepeatEmptyQueueException;
+import com.github.daci1.discord_bot.services.DiscordBotService;
+import com.github.daci1.discord_bot.services.MembersStateService;
+import com.github.daci1.discord_bot.services.PlayerManagerService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,14 +17,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SkipCommand extends ListenerAdapter implements ISlashCommand {
+public class RepeatQueueCommand extends ListenerAdapter implements ISlashCommand {
     private final DiscordBotService discordBotService;
-    private final PlayerManagerService playerManager;
+    private  final PlayerManagerService playerManagerService;
     private final MembersStateService membersStateService;
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals(SlashCommand.SKIP.getName())) {
+        if (event.getName().equals(SlashCommand.REPEAT_QUEUE.getName())) {
             event.deferReply().queue();
             this.handleEvent(event);
         }
@@ -47,13 +47,14 @@ public class SkipCommand extends ListenerAdapter implements ISlashCommand {
         if (membersStateService.replyIfBotNotInSameVoiceChannelAsRequester(event, self, requester)) {
             return;
         }
-
-        final boolean skippedSuccessful = playerManager.skipCurrentTrack(guild);
-        if (skippedSuccessful) {
-            event.getHook().sendMessage(":loud_sound: Skipped the current track").queue();
-        } else {
-            event.getHook().sendMessage(":x: **There is no track playing currently**").queue();
+        try {
+            final boolean isRepeatQueueEnabled = playerManagerService.repeatCurrentQueue(guild);
+            event.getHook().sendMessageFormat(":repeat: Repeat current Queue `%s` :repeat:", isRepeatQueueEnabled ? "Enabled" : "Disabled").queue();
+        } catch (RepeatEmptyQueueException exception) {
+            event.getHook().sendMessage(exception.getMessage()).queue();
         }
+
+
     }
 
     @Override
